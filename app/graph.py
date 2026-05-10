@@ -1,7 +1,7 @@
 from typing import List, TypedDict
 from langgraph.graph import END, StateGraph
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader 
+from langchain_text_splitters import RecursiveCharacterTextSplitter 
 import os
 
 class GraphState(TypedDict):
@@ -56,9 +56,7 @@ workflow.add_conditional_edges(
 )
 
 workflow.add_edge("rewrite_query", "vector_search")
-
 workflow.add_edge("generate_output", END)
-
 app = workflow.compile()
 
 if __name__ == "__main__":
