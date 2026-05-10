@@ -1,3 +1,4 @@
 venv/
 finances.pdf
 __pycache__
+neo4j_data/
