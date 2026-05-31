@@ -1,4 +1,4 @@
-# Agentic RAG Engine
+# GraphRAG Engine
 
 
 ![Fluxo](fluxo.png)
