@@ -1,7 +1,10 @@
 from typing import List, TypedDict
 from langgraph.graph import END, StateGraph
 from langchain_community.document_loaders import PyPDFLoader 
-from langchain_text_splitters import RecursiveCharacterTextSplitter 
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_ollama import ChatOllama
+from langchain_neo4j.chains.graph_qa.cypher import GraphCypherQAChain
+from langchain_neo4j import Neo4jGraph
 import os
 
 class GraphState(TypedDict):
@@ -25,7 +28,32 @@ def process_pdf(file_path: str) -> List:
 
 
 def retrieve(state: GraphState):
-    pass
+    print("Iniciando a etapa de recuperação de documentos relevantes para a pergunta:", state["question"])
+    question = state["question"]
+    
+    llm = ChatOllama(
+        model="qwen2.5-coder:7b", 
+        temperature=0.1,            
+        baseUrl="http://localhost:11434"
+    )
+
+    cypher_chain = GraphCypherQAChain.from_llm(
+        llm=llm, 
+        graph=graph, 
+        verbose=True,
+        return_direct=True,
+        allow_dangerous_requests=True  # Acknowledges the risk of arbitrary Cypher query execution
+    )
+
+    try:
+        print(f"Qwen gerando query Cypher para: '{question}'...")
+        graph_results = cypher_chain.invoke({"query": question})
+        graph_context = f"Dados do Grafo: {str(graph_results)}"
+    except Exception as e:
+        print(f"Erro na consulta com Qwen: {e}")
+        graph_context = "Nenhum dado encontrado."
+
+    return {"documents": [graph_context]}
 
 def generate(state: GraphState):
     pass
@@ -40,14 +68,14 @@ def grade_documents(state: GraphState):
 
 workflow = StateGraph(GraphState)
 
-workflow.add_node("vector_search", retrieve)
+workflow.add_node("hybrid_search", retrieve)
 workflow.add_node("generate_output", generate)
 workflow.add_node("rewrite_query", rewrite)
 
-workflow.set_entry_point("vector_search")
+workflow.set_entry_point("hybrid_search")
 
 workflow.add_conditional_edges(
-    "vector_search", 
+    "hybrid_search", 
     grade_documents, 
     {
         "yes": "generate_output", 
@@ -55,7 +83,7 @@ workflow.add_conditional_edges(
     }
 )
 
-workflow.add_edge("rewrite_query", "vector_search")
+workflow.add_edge("rewrite_query", "hybrid_search")
 workflow.add_edge("generate_output", END)
 app = workflow.compile()
 
