@@ -33,7 +33,7 @@ def retrieve(state: GraphState):
     question = state["question"]
     
     llm = ChatOllama(
-        model="qwen2.5-coder:7b", 
+        model="qwen2.5-coder:3b", 
         temperature=0.1,            
         baseUrl="http://localhost:11434"
     )
