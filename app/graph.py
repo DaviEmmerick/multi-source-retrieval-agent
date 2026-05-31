@@ -5,6 +5,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_ollama import ChatOllama
 from langchain_neo4j.chains.graph_qa.cypher import GraphCypherQAChain
 from langchain_neo4j import Neo4jGraph
+from setup_neo4j import graph
 import os
 
 class GraphState(TypedDict):
@@ -41,8 +42,7 @@ def retrieve(state: GraphState):
         llm=llm, 
         graph=graph, 
         verbose=True,
-        return_direct=True,
-        allow_dangerous_requests=True  # Acknowledges the risk of arbitrary Cypher query execution
+        return_direct=True 
     )
 
     try:
