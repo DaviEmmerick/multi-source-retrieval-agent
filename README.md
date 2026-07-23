@@ -2,10 +2,10 @@
 
 ## High Level 
 
-![Fluxo](fluxo.png)
+![Fluxo](assets/fluxo.png)
 
 ---
 
 ## Interface 
 
-![Interface](interface.png)
+![Interface](assets/interface.png)
